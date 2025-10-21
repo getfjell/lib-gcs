@@ -126,3 +126,4 @@ Apache-2.0
 
 This is part of the Fjell project. See the main repository for contribution guidelines.
 
+TEST
