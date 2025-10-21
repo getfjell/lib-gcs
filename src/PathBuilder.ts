@@ -251,5 +251,108 @@ export class PathBuilder {
   getBasePath(): string {
     return this.basePath;
   }
+
+  /**
+   * Build directory path from locations for listing operations
+   */
+  buildDirectoryFromLocations(locations: any[]): string {
+    const parts: string[] = [];
+
+    if (this.basePath) {
+      parts.push(this.basePath);
+    }
+
+    // Add each location as directory/key pairs
+    for (const location of locations) {
+      const locDirectory = this.getDirectoryForKeyType(location.kt);
+      parts.push(locDirectory);
+      parts.push(String(location.lk));
+    }
+
+    return parts.join('/');
+  }
+
+  /**
+   * Build path to the files directory for an item
+   * Example: user/23-34-32/recording/2443-332/_files
+   */
+  buildFilesDirectory(key: PriKey<any> | ComKey<any, any, any, any, any, any>, filesDir: string = '_files'): string {
+    // Get the base path for the item (without .json extension)
+    const itemPath = this.buildPath(key);
+    const itemPathWithoutExt = this.stripExtension(itemPath);
+    
+    return `${itemPathWithoutExt}/${filesDir}`;
+  }
+
+  /**
+   * Build path to a specific file
+   * Example: user/23-34-32/recording/2443-332/_files/master/0.wav
+   */
+  buildFilePath(
+    key: PriKey<any> | ComKey<any, any, any, any, any, any>,
+    label: string,
+    filename: string,
+    filesDir: string = '_files'
+  ): string {
+    const filesDirectory = this.buildFilesDirectory(key, filesDir);
+    return `${filesDirectory}/${label}/${filename}`;
+  }
+
+  /**
+   * Build path to a label directory
+   * Example: user/23-34-32/recording/2443-332/_files/master
+   */
+  buildLabelDirectory(
+    key: PriKey<any> | ComKey<any, any, any, any, any, any>,
+    label: string,
+    filesDir: string = '_files'
+  ): string {
+    const filesDirectory = this.buildFilesDirectory(key, filesDir);
+    return `${filesDirectory}/${label}`;
+  }
+
+  /**
+   * Parse file path to extract key, label, and filename
+   * Example: user/23-34-32/recording/2443-332/_files/master/0.wav
+   * Returns: { key: ComKey, label: 'master', filename: '0.wav' }
+   */
+  parseFilePath(path: string, filesDir: string = '_files'): {
+    key: PriKey<any> | ComKey<any, any, any, any, any, any>;
+    label: string;
+    filename: string;
+  } | null {
+    try {
+      // Split path by _files directory
+      const parts = path.split(`/${filesDir}/`);
+      if (parts.length !== 2) {
+        return null;
+      }
+
+      // First part is the item path
+      const itemPath = parts[0];
+      
+      // Second part is label/filename
+      const fileParts = parts[1].split('/');
+      if (fileParts.length < 2) {
+        return null;
+      }
+
+      const label = fileParts[0];
+      const filename = fileParts.slice(1).join('/');
+
+      // Parse item path to get key (add .json extension if needed)
+      const itemPathWithJson = this.useJsonExtension ? `${itemPath}.json` : itemPath;
+      const key = this.parsePathToKey(itemPathWithJson);
+
+      if (!key) {
+        return null;
+      }
+
+      return { key, label, filename };
+    } catch (error) {
+      logger.error('Failed to parse file path', { path, error });
+      return null;
+    }
+  }
 }
 
