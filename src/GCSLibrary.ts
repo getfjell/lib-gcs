@@ -5,6 +5,9 @@ import { Storage } from '@google-cloud/storage';
 import { Options } from './Options';
 import { createDefinition } from './Definition';
 import { createOperations } from './Operations';
+import { createFileOperations, FileOperations } from './FileOperations';
+import { PathBuilder } from './PathBuilder';
+import { FileProcessor } from './FileProcessor';
 import GCSLogger from './logger';
 
 const logger = GCSLogger.get('GCSLibrary');
@@ -27,6 +30,9 @@ export interface GCSLibrary<
   
   /** The bucket name where items are stored */
   bucketName: string;
+
+  /** File attachment operations */
+  files: FileOperations<V, S, L1, L2, L3, L4, L5>;
 }
 
 /**
@@ -46,7 +52,8 @@ export function createGCSLibraryFromComponents<
   storage: Storage,
   bucketName: string,
   operations: Library.Operations<V, S, L1, L2, L3, L4, L5>,
-  options: Options<V, S, L1, L2, L3, L4, L5>
+  options: Options<V, S, L1, L2, L3, L4, L5>,
+  fileOperations: FileOperations<V, S, L1, L2, L3, L4, L5>
 ): GCSLibrary<V, S, L1, L2, L3, L4, L5> {
   logger.default('createGCSLibraryFromComponents', {
     coordinate,
@@ -61,6 +68,7 @@ export function createGCSLibraryFromComponents<
     bucketName,
     operations,
     options,
+    files: fileOperations,
   } as GCSLibrary<V, S, L1, L2, L3, L4, L5>;
 }
 
@@ -109,6 +117,26 @@ export function createGCSLibrary<
     definition
   );
 
+  // Create file operations
+  const pathBuilder = new PathBuilder({
+    bucketName: definition.bucketName,
+    directoryPaths: definition.directoryPaths,
+    basePath: definition.basePath,
+    useJsonExtension: definition.options.useJsonExtension,
+    keySharding: definition.options.keySharding
+  });
+
+  const fileProcessor = new FileProcessor();
+
+  const fileOperations = createFileOperations<V, S, L1, L2, L3, L4, L5>(
+    storageClient,
+    bucketName,
+    pathBuilder,
+    fileProcessor,
+    definition.coordinate,
+    definition.options
+  );
+
   // Create coordinate
   const coordinate = definition.coordinate;
 
@@ -119,7 +147,8 @@ export function createGCSLibrary<
     storageClient,
     bucketName,
     operations,
-    definition.options
+    definition.options,
+    fileOperations
   );
 }
 

@@ -52,15 +52,25 @@ export async function all<
   try {
     const bucket = storage.bucket(bucketName);
     
-    // Determine directory prefix
-    const kt = coordinate.kta[0];
-    let prefix = pathBuilder.getBasePath();
-    if (prefix) {
-      prefix += '/';
+    // Determine directory prefix based on locations
+    let prefix: string;
+    
+    if (locations && locations.length > 0) {
+      // Build prefix from locations
+      const locationPath = pathBuilder.buildDirectoryFromLocations(locations as any[]);
+      const kt = coordinate.kta[0];
+      prefix = locationPath ? `${locationPath}/${kt}` : kt;
+    } else {
+      // No locations specified - list all items of this type
+      const kt = coordinate.kta[0];
+      prefix = pathBuilder.getBasePath();
+      if (prefix) {
+        prefix += '/';
+      }
+      prefix += kt;
     }
-    prefix += kt;
 
-    logger.default('Listing files', { prefix });
+    logger.default('Listing files', { prefix, locations });
 
     // List all files in directory
     const [files] = await bucket.getFiles({

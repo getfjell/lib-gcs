@@ -10,10 +10,10 @@ export default [
     },
   },
   {
-    // Allow more parameters for internal operation functions
-    files: ["src/ops/**/*.ts"],
+    // Allow more parameters for internal operation functions and factory methods
+    files: ["src/**/*.ts"],
     rules: {
-      "max-params": ["warn", 10],
+      "max-params": "off", // Disabled for GCS library due to complex operation signatures
     },
   },
 ];
