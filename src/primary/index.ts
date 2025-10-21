@@ -1,2 +1,2 @@
-export * from './GCSLibrary';
+export { createPrimaryGCSLibrary } from './GCSLibrary';
 
