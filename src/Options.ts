@@ -77,6 +77,26 @@ export interface Options<
     /** Maximum concurrent file downloads during query operations (default: 10) */
     downloadConcurrency?: number;
   };
+
+  /**
+   * File attachment configuration
+   */
+  files?: {
+    /** Subdirectory name for files (default: "_files") */
+    directory?: string;
+    
+    /** Maximum file size in bytes (default: no limit) */
+    maxFileSize?: number;
+    
+    /** Allowed content types (default: all allowed) */
+    allowedContentTypes?: string[];
+    
+    /** Whether to include file metadata in item JSON (default: true) */
+    includeMetadataInItem?: boolean;
+    
+    /** Whether to compute checksums (default: true) */
+    computeChecksums?: boolean;
+  };
 }
 
 /**
