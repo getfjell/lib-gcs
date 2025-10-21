@@ -9,3 +9,5 @@ export { createDefinition } from './Definition';
 export * as Contained from './contained';
 export * as Primary from './primary';
 
+// Re-export commonly used types from @fjell/core for convenience
+export type { PriKey, ComKey, Item, Coordinate, ItemTypeArray } from '@fjell/core';
