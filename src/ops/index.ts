@@ -5,4 +5,3 @@ export * from './upsert';
 export * from './remove';
 export * from './all';
 export * from './one';
-
