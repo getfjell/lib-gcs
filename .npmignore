@@ -1,52 +1,45 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
-
 # Source files
 src/
 tests/
 examples/
-docs/
-
-# Coverage and output
-coverage/
-output/
-dist/tests/
-
-# Dependencies
-node_modules/
 
 # Config files
+*.config.ts
+*.config.js
+*.config.mjs
 tsconfig.json
-tsconfig.*.json
-vitest.config.ts
-vitest.config.js
-vitest.setup.ts
+tsconfig.build.json
 eslint.config.mjs
-.eslintrc.json
-build.js
-esbuild.config.js
-generate-types.js
-babel.config.js
-jest.config.ts
-vite.config.ts
-cloudbuild.yaml
+vitest.config.ts
 
-# IDE and VCS
+# Build scripts
+build.js
+scripts/
+
+# Documentation (keep only README for npm)
+docs/
+prompts/
+
+# Test and coverage
+coverage/
+*.test.ts
+*.spec.ts
+
+# Development files
+.gitignore
+.git/
+.github/
 .vscode/
 .idea/
-.github/
-.gitignore
-.npmignore
+
+# Output directories
+output/
+
+# Misc
+*.md~
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 .DS_Store
-
-# Package managers
-yarn.lock
-.yarnrc.yml
-.yarn/
-
-# Other
-.kodrdriv/
-commit.sh
-release.sh
-*.md
-!LICENSE.md
-
+node_modules/
