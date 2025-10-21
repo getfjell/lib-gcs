@@ -1,6 +1,6 @@
 import Logging from '@fjell/logging';
 
-const LibLogger = Logging.getLogger('@fjell/lib-gcs');
+const GCSLogger = Logging.getLogger('@fjell/lib-gcs');
 
-export default LibLogger;
+export default GCSLogger;
 
