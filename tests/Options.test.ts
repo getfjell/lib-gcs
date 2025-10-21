@@ -1,5 +1,4 @@
 import { Item } from '@fjell/core';
-import * as Library from '@fjell/lib';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Define a generic item type for testing purposes
@@ -20,49 +19,78 @@ describe('createOptions', () => {
     mockLibCreateOptions.mockClear();
   });
 
-  it('should call Library.createOptions with provided options and return its result', async () => {
+  it('should call Library.createOptions and add GCS-specific options', async () => {
     const { createOptions } = await import('../src/Options');
-    const libOptions: Partial<MockItem> = {
-      id: '123',
-      name: 'Test Item'
+    const bucketName = 'test-bucket';
+    const libOptions = {
+      mode: 'full' as const,
     };
-    const expectedOptionsOutput = { ...libOptions, someOtherProp: 'test' };
-    mockLibCreateOptions.mockReturnValue(expectedOptionsOutput);
+    
+    mockLibCreateOptions.mockReturnValue({});
 
-    const result: any = createOptions(libOptions as Library.Options<MockItem, string, 'l1', 'l2', 'l3', 'l4', 'l5'>);
+    const result = createOptions<MockItem, string>(bucketName, libOptions);
 
     expect(mockLibCreateOptions).toHaveBeenCalledTimes(1);
-    expect(mockLibCreateOptions).toHaveBeenCalledWith(libOptions);
-    expect(result).toEqual(expectedOptionsOutput);
+    expect(result.bucketName).toBe(bucketName);
+    expect(result.mode).toBe('full');
+    expect(result.useJsonExtension).toBe(true);
   });
 
-  it('should call Library.createOptions with empty object if no options are provided', async () => {
+  it('should set default values for GCS-specific options', async () => {
     const { createOptions } = await import('../src/Options');
-    const expectedOptionsOutput = { someOtherProp: 'defaultTest' };
-    mockLibCreateOptions.mockReturnValue(expectedOptionsOutput);
+    const bucketName = 'test-bucket';
+    
+    mockLibCreateOptions.mockReturnValue({});
 
-    const result: any = createOptions();
+    const result = createOptions<MockItem, string>(bucketName);
 
-    expect(mockLibCreateOptions).toHaveBeenCalledTimes(1);
-    expect(mockLibCreateOptions).toHaveBeenCalledWith({});
-    expect(result).toEqual(expectedOptionsOutput);
+    expect(result.bucketName).toBe(bucketName);
+    expect(result.basePath).toBe('');
+    expect(result.useJsonExtension).toBe(true);
+    expect(result.mode).toBe('full');
+    expect(result.fileMetadataStorage).toBe('none');
+    expect(result.keySharding?.enabled).toBe(false);
+    expect(result.keySharding?.levels).toBe(2);
+    expect(result.keySharding?.charsPerLevel).toBe(1);
+    expect(result.querySafety?.maxScanFiles).toBe(1000);
+    expect(result.querySafety?.warnThreshold).toBe(100);
+    expect(result.querySafety?.disableQueryOperations).toBe(false);
+    expect(result.querySafety?.downloadConcurrency).toBe(10);
   });
 
-  it('should preserve GCS-specific options', async () => {
+  it('should preserve custom GCS-specific options', async () => {
     const { createOptions } = await import('../src/Options');
-    const mockOutput: any = {
-      bucketName: 'test-bucket',
-      mode: 'full',
+    const bucketName = 'test-bucket';
+    const libOptions = {
+      basePath: 'production',
+      mode: 'files-only' as const,
+      useJsonExtension: false,
+      keySharding: {
+        enabled: true,
+        levels: 3,
+        charsPerLevel: 2,
+      },
+      querySafety: {
+        maxScanFiles: 500,
+        warnThreshold: 50,
+        disableQueryOperations: true,
+        downloadConcurrency: 5,
+      },
     };
-    mockLibCreateOptions.mockReturnValue(mockOutput);
+    
+    mockLibCreateOptions.mockReturnValue({});
 
-    const customOptions: any = {
-      bucketName: 'test-bucket',
-      mode: 'full',
-    };
-    const result: any = createOptions(customOptions);
+    const result = createOptions<MockItem, string>(bucketName, libOptions);
 
-    expect(result).toEqual(mockOutput);
+    expect(result.basePath).toBe('production');
+    expect(result.mode).toBe('files-only');
+    expect(result.useJsonExtension).toBe(false);
+    expect(result.keySharding?.enabled).toBe(true);
+    expect(result.keySharding?.levels).toBe(3);
+    expect(result.keySharding?.charsPerLevel).toBe(2);
+    expect(result.querySafety?.maxScanFiles).toBe(500);
+    expect(result.querySafety?.warnThreshold).toBe(50);
+    expect(result.querySafety?.disableQueryOperations).toBe(true);
+    expect(result.querySafety?.downloadConcurrency).toBe(5);
   });
 });
-
