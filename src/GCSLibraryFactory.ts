@@ -1,56 +1,161 @@
-import { Coordinate, Item } from "@fjell/core";
-import * as Library from "@fjell/lib";
-import { Registry } from "@fjell/lib";
-import { Options } from "./Options";
-import { InstanceFactory as BaseInstanceFactory, RegistryHub } from "@fjell/registry";
-import { createGCSLibraryFromComponents, GCSLibrary } from "./GCSLibrary";
-import LibLogger from "./logger";
+import { Item, ItemTypeArray } from '@fjell/core';
+import { Storage } from '@google-cloud/storage';
+import { Registry } from '@fjell/lib';
+import * as Library from '@fjell/lib';
+import { createGCSLibrary, GCSLibrary } from './GCSLibrary';
+import GCSLogger from './logger';
 
-const logger = LibLogger.get("GCSLibraryFactory");
-
-export type GCSLibraryFactory<
-  V extends Item<S, L1, L2, L3, L4, L5>,
-  S extends string,
-  L1 extends string = never,
-  L2 extends string = never,
-  L3 extends string = never,
-  L4 extends string = never,
-  L5 extends string = never
-> = (
-  storage: any,
-  operations: Library.Operations<V, S, L1, L2, L3, L4, L5>,
-  options: Options<V, S, L1, L2, L3, L4, L5>,
-  bucketName: string
-) => BaseInstanceFactory<S, L1, L2, L3, L4, L5>;
+const logger = GCSLogger.get('GCSLibraryFactory');
 
 /**
- * Factory function for creating GCS libraries
+ * Configuration for GCS Library Factory
  */
-export const createGCSLibraryFactory = <
-  V extends Item<S, L1, L2, L3, L4, L5>,
-  S extends string,
-  L1 extends string = never,
-  L2 extends string = never,
-  L3 extends string = never,
-  L4 extends string = never,
-  L5 extends string = never
->(
-    storage: any,
-    operations: Library.Operations<V, S, L1, L2, L3, L4, L5>,
-    options: Options<V, S, L1, L2, L3, L4, L5>,
-    bucketName: string
-  ): BaseInstanceFactory<S, L1, L2, L3, L4, L5> => {
-  return (coordinate: Coordinate<S, L1, L2, L3, L4, L5>, context: { registry: any, registryHub?: RegistryHub }) => {
-    logger.default("Creating GCS library", { coordinate, registry: context.registry, storage, operations, options, bucketName });
-
-    return createGCSLibraryFromComponents(
-      context.registry as Registry,
-      coordinate,
-      storage,
-      operations,
-      options,
-      bucketName
-    ) as GCSLibrary<V, S, L1, L2, L3, L4, L5>;
+export interface GCSLibraryFactoryConfig {
+  bucketName: string;
+  storage?: Storage;
+  basePath?: string;
+  registry?: Registry;
+  useJsonExtension?: boolean;
+  mode?: 'full' | 'files-only';
+  keySharding?: {
+    enabled?: boolean;
+    levels?: number;
+    charsPerLevel?: number;
   };
-};
+  querySafety?: {
+    maxScanFiles?: number;
+    warnThreshold?: number;
+    disableQueryOperations?: boolean;
+    downloadConcurrency?: number;
+  };
+}
 
+/**
+ * Factory for creating GCS libraries for primary items
+ */
+export function createPrimaryGCSLibrary<
+  V extends Item<S>,
+  S extends string
+>(
+  keyType: S,
+  directoryPath: string,
+  config: GCSLibraryFactoryConfig,
+  libOptions?: Partial<Library.Options<V, S>>
+): GCSLibrary<V, S> {
+  logger.default('createPrimaryGCSLibrary', { keyType, directoryPath, config });
+
+  const kta = [keyType] as ItemTypeArray<S>;
+  const directoryPaths = [directoryPath];
+
+  const mergedOptions = {
+    ...libOptions,
+    bucketName: config.bucketName,
+    storage: config.storage,
+    basePath: config.basePath,
+    useJsonExtension: config.useJsonExtension,
+    mode: config.mode,
+    keySharding: config.keySharding,
+    querySafety: config.querySafety,
+  };
+
+  return createGCSLibrary<V, S>(
+    kta,
+    directoryPaths,
+    config.bucketName,
+    config.storage || null,
+    mergedOptions,
+    null,
+    config.registry
+  );
+}
+
+/**
+ * Factory for creating GCS libraries for contained items (1 level)
+ */
+export function createContainedGCSLibrary<
+  V extends Item<S, L1>,
+  S extends string,
+  L1 extends string
+>(
+  keyType: S,
+  parentKeyType: L1,
+  directoryPaths: [string, string],
+  config: GCSLibraryFactoryConfig,
+  libOptions?: Partial<Library.Options<V, S, L1>>
+): GCSLibrary<V, S, L1> {
+  logger.default('createContainedGCSLibrary', {
+    keyType,
+    parentKeyType,
+    directoryPaths,
+    config
+  });
+
+  const kta = [keyType, parentKeyType] as ItemTypeArray<S, L1>;
+
+  const mergedOptions = {
+    ...libOptions,
+    bucketName: config.bucketName,
+    storage: config.storage,
+    basePath: config.basePath,
+    useJsonExtension: config.useJsonExtension,
+    mode: config.mode,
+    keySharding: config.keySharding,
+    querySafety: config.querySafety,
+  };
+
+  return createGCSLibrary<V, S, L1>(
+    kta,
+    [...directoryPaths],
+    config.bucketName,
+    config.storage || null,
+    mergedOptions,
+    null,
+    config.registry
+  );
+}
+
+/**
+ * Factory for creating GCS libraries for contained items (2 levels)
+ */
+export function createContainedGCSLibrary2<
+  V extends Item<S, L1, L2>,
+  S extends string,
+  L1 extends string,
+  L2 extends string
+>(
+  keyType: S,
+  parentKeyTypes: [L1, L2],
+  directoryPaths: [string, string, string],
+  config: GCSLibraryFactoryConfig,
+  libOptions?: Partial<Library.Options<V, S, L1, L2>>
+): GCSLibrary<V, S, L1, L2> {
+  logger.default('createContainedGCSLibrary2', {
+    keyType,
+    parentKeyTypes,
+    directoryPaths,
+    config
+  });
+
+  const kta = [keyType, ...parentKeyTypes] as ItemTypeArray<S, L1, L2>;
+
+  const mergedOptions = {
+    ...libOptions,
+    bucketName: config.bucketName,
+    storage: config.storage,
+    basePath: config.basePath,
+    useJsonExtension: config.useJsonExtension,
+    mode: config.mode,
+    keySharding: config.keySharding,
+    querySafety: config.querySafety,
+  };
+
+  return createGCSLibrary<V, S, L1, L2>(
+    kta,
+    [...directoryPaths],
+    config.bucketName,
+    config.storage || null,
+    mergedOptions,
+    null,
+    config.registry
+  );
+}
