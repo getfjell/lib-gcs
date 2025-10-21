@@ -35,9 +35,13 @@ describe('createOperations', () => {
     expect(typeof operations.one).toBe('function');
   });
 
-  it('should have placeholder implementations for advanced features', () => {
+  it('should have finders, actions, and facets from options', () => {
     const mockStorage = {} as any;
     const coordinate = createCoordinate(['test']);
+    
+    const testFinder = async () => [];
+    const testAction = async (item: any) => [item, []];
+    const testFacet = async () => ({ test: true });
     
     const definition: Definition<any, any> = {
       coordinate,
@@ -46,7 +50,10 @@ describe('createOperations', () => {
       basePath: '',
       options: {
         bucketName: 'test-bucket',
-        mode: 'full'
+        mode: 'full',
+        finders: { testFinder },
+        actions: { testAction },
+        facets: { testFacet }
       } as any
     };
 
@@ -55,9 +62,12 @@ describe('createOperations', () => {
     expect(operations.finders).toBeDefined();
     expect(operations.actions).toBeDefined();
     expect(operations.facets).toBeDefined();
+    expect(operations.finders.testFinder).toBe(testFinder);
+    expect(operations.actions.testAction).toBe(testAction);
+    expect(operations.facets.testFacet).toBe(testFacet);
   });
 
-  it('should throw error for not implemented methods', () => {
+  it('should have all extended operation methods', () => {
     const mockStorage = {} as any;
     const coordinate = createCoordinate(['test']);
     
@@ -74,8 +84,11 @@ describe('createOperations', () => {
 
     const operations = createOperations(mockStorage, definition);
 
-    expect(() => operations.find()).toThrow('Not implemented yet');
-    expect(() => operations.findOne()).toThrow('Not implemented yet');
-    expect(() => operations.action()).toThrow('Not implemented yet');
+    expect(typeof operations.find).toBe('function');
+    expect(typeof operations.findOne).toBe('function');
+    expect(typeof operations.action).toBe('function');
+    expect(typeof operations.allAction).toBe('function');
+    expect(typeof operations.facet).toBe('function');
+    expect(typeof operations.allFacet).toBe('function');
   });
 });
