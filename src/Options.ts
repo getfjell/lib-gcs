@@ -1,11 +1,9 @@
-import { ComKey, Item, LocKeyArray, PriKey } from '@fjell/core';
+import { Item } from '@fjell/core';
 import * as Library from '@fjell/lib';
-import LibLogger from './logger';
-
-const logger = LibLogger.get('Options');
+import { Storage } from '@google-cloud/storage';
 
 /**
- * GCS-specific Options
+ * GCS-specific Options that extends base library options
  */
 export interface Options<
   V extends Item<S, L1, L2, L3, L4, L5>,
@@ -15,67 +13,75 @@ export interface Options<
   L3 extends string = never,
   L4 extends string = never,
   L5 extends string = never
-> {
-  hooks?: {
-    preCreate?: (
-      item: Partial<Item<S, L1, L2, L3, L4, L5>>,
-      options?:
-        {
-          key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
-          locations?: never;
-        } | {
-          key?: never;
-          locations: LocKeyArray<L1, L2, L3, L4, L5>,
-        }
-    ) => Promise<Partial<Item<S, L1, L2, L3, L4, L5>>>;
-    postCreate?: (
-      item: V,
-    ) => Promise<V>;
-    preUpdate?: (
-      key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
-      item: Partial<Item<S, L1, L2, L3, L4, L5>>,
-    ) => Promise<Partial<Item<S, L1, L2, L3, L4, L5>>>;
-    postUpdate?: (
-      item: V,
-    ) => Promise<V>;
-    preRemove?: (
-      key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
-    ) => Promise<Partial<Item<S, L1, L2, L3, L4, L5>>>;
-    postRemove?: (
-      item: V,
-    ) => Promise<V>;
-  },
-  validators?: {
-    onCreate?: (
-      item: Partial<Item<S, L1, L2, L3, L4, L5>>,
-      options?:
-        {
-          key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
-          locations?: never;
-        } | {
-          key?: never;
-          locations: LocKeyArray<L1, L2, L3, L4, L5>,
-        }
-    ) => Promise<boolean>;
-    onUpdate?: (
-      key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
-      item: Partial<Item<S, L1, L2, L3, L4, L5>>,
-    ) => Promise<boolean>;
-    onRemove?: (
-      key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
-    ) => Promise<boolean>;
-  },
-  finders?: Record<string, Library.FinderMethod<V, S, L1, L2, L3, L4, L5>>,
-  actions?: Record<string, Library.ActionMethod<V, S, L1, L2, L3, L4, L5>>,
-  facets?: Record<string, Library.FacetMethod<V, S, L1, L2, L3, L4, L5>>,
-  allActions?: Record<string, Library.AllActionMethod<V, S, L1, L2, L3, L4, L5>>,
-  allFacets?: Record<string, Library.AllFacetMethod<L1, L2, L3, L4, L5>>,
-  aggregations?: Library.AggregationDefinition[],
-  // GCS-specific options
-  bucketName?: string;
+> extends Library.Options<V, S, L1, L2, L3, L4, L5> {
+  /** The GCS bucket name where items are stored */
+  bucketName: string;
+  
+  /** Optional GCS storage client (if not provided, one will be created) */
+  storage?: Storage;
+  
+  /** Optional base path prefix within the bucket */
+  basePath?: string;
+  
+  /** Whether to use .json extension for files (default: true) */
+  useJsonExtension?: boolean;
+  
+  /**
+   * Library mode (default: 'full')
+   * - 'full': Both item operations AND file operations (complete storage in GCS)
+   * - 'files-only': ONLY file operations (hybrid mode - items stored elsewhere)
+   *
+   * Use 'files-only' when items are stored in another library (e.g., Firestore)
+   * but you want to use GCS for file attachments.
+   */
   mode?: 'full' | 'files-only';
+  
+  /**
+   * When in 'files-only' mode, where to store file metadata
+   * - 'none': Don't store metadata, list from GCS on demand (slower)
+   * - 'external': Metadata stored in external library (caller manages)
+   */
+  fileMetadataStorage?: 'none' | 'external';
+  
+  /**
+   * Key sharding configuration for massive datasets (billions of objects)
+   * Adds prefix directories based on the first N characters of the primary key
+   * Example: user/abc123.json → user/a/ab/abc123.json
+   * This improves performance by distributing objects across more prefixes
+   */
+  keySharding?: {
+    /** Enable key sharding (default: false) */
+    enabled?: boolean;
+    
+    /** Number of prefix levels (1-3, default: 2) */
+    levels?: number;
+    
+    /** Characters per level (default: 1, so 2 levels = a/ab/) */
+    charsPerLevel?: number;
+  };
+  
+  /**
+   * Query operation safety limits (to prevent expensive operations on large buckets)
+   * GCS does not support server-side querying - all filtering happens in-memory
+   */
+  querySafety?: {
+    /** Maximum number of files to scan in all()/one() operations (default: 1000) */
+    maxScanFiles?: number;
+    
+    /** Log warning when scanning more than this many files (default: 100) */
+    warnThreshold?: number;
+    
+    /** If true, disable all()/one() operations entirely (default: false) */
+    disableQueryOperations?: boolean;
+    
+    /** Maximum concurrent file downloads during query operations (default: 10) */
+    downloadConcurrency?: number;
+  };
 }
 
+/**
+ * Create Options with defaults
+ */
 export const createOptions = <
   V extends Item<S, L1, L2, L3, L4, L5>,
   S extends string,
@@ -84,15 +90,31 @@ export const createOptions = <
   L3 extends string = never,
   L4 extends string = never,
   L5 extends string = never
->(libOptions?: Library.Options<V, S, L1, L2, L3, L4, L5>):
-  Options<V, S, L1, L2, L3, L4, L5> => {
-  logger.default('createOptions', { libOptions });
-  
+>(
+    bucketName: string,
+    libOptions?: Partial<Library.Options<V, S, L1, L2, L3, L4, L5>> & Partial<Options<V, S, L1, L2, L3, L4, L5>>
+  ): Options<V, S, L1, L2, L3, L4, L5> => {
   // Create base options from Library
   const baseOptions = Library.createOptions(libOptions || {} as Library.Options<V, S, L1, L2, L3, L4, L5>);
   
   return {
     ...baseOptions,
+    bucketName,
+    storage: libOptions?.storage,
+    basePath: libOptions?.basePath || '',
+    useJsonExtension: libOptions?.useJsonExtension ?? true,
+    mode: libOptions?.mode || 'full',
+    fileMetadataStorage: libOptions?.fileMetadataStorage || 'none',
+    keySharding: {
+      enabled: libOptions?.keySharding?.enabled ?? false,
+      levels: libOptions?.keySharding?.levels || 2,
+      charsPerLevel: libOptions?.keySharding?.charsPerLevel || 1,
+    },
+    querySafety: {
+      maxScanFiles: libOptions?.querySafety?.maxScanFiles || 1000,
+      warnThreshold: libOptions?.querySafety?.warnThreshold || 100,
+      disableQueryOperations: libOptions?.querySafety?.disableQueryOperations ?? false,
+      downloadConcurrency: libOptions?.querySafety?.downloadConcurrency || 10,
+    },
   } as Options<V, S, L1, L2, L3, L4, L5>;
-}
-
+};
