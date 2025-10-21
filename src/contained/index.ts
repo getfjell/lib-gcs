@@ -1,2 +1,2 @@
-export * from './GCSLibrary';
+export { createContainedGCSLibrary, createContainedGCSLibrary2 } from './GCSLibrary';
 

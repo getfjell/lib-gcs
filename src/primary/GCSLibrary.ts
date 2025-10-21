@@ -1,19 +1,35 @@
-import { Item } from '@fjell/core';
+import { Item, ItemTypeArray } from '@fjell/core';
 import * as Library from '@fjell/lib';
-import LibLogger from '../logger';
+import { Storage } from '@google-cloud/storage';
+import { createGCSLibrary, GCSLibrary } from '../GCSLibrary';
+import GCSLogger from '../logger';
 
-const logger = LibLogger.get('primary/GCSLibrary');
+const logger = GCSLogger.get('primary', 'GCSLibrary');
 
 /**
- * Primary GCS Library Interface
- * Placeholder for now
+ * Specialized factory for primary items - simpler API
  */
-export interface GCSLibrary<
+export function createPrimaryGCSLibrary<
   V extends Item<S>,
   S extends string
-> {
-  operations: Library.Primary.Operations<V, S>;
+>(
+  keyType: S,
+  directory: string,
+  bucketName: string,
+  storage?: Storage,
+  options?: Partial<Library.Options<V, S>>
+): GCSLibrary<V, S> {
+  logger.default('createPrimaryGCSLibrary', { keyType, directory, bucketName });
+
+  const kta = [keyType] as ItemTypeArray<S>;
+  const directoryPaths = [directory];
+
+  return createGCSLibrary<V, S>(
+    kta,
+    directoryPaths,
+    bucketName,
+    storage || null,
+    options || null,
+    null
+  );
 }
-
-logger.default('Primary GCS Library module loaded');
-
