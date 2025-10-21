@@ -6,6 +6,7 @@ import { PathBuilder } from './PathBuilder';
 import { FileProcessor } from './FileProcessor';
 import * as ops from './ops';
 import GCSLogger from './logger';
+import { Registry } from '@fjell/lib';
 
 const logger = GCSLogger.get('Operations');
 
@@ -22,7 +23,9 @@ export const createOperations = <
   L5 extends string = never
 >(
     storage: Storage,
-    definition: Definition<V, S, L1, L2, L3, L4, L5>
+    definition: Definition<V, S, L1, L2, L3, L4, L5>,
+   
+    _registry?: Registry
   ): Library.Operations<V, S, L1, L2, L3, L4, L5> => {
   logger.default('createOperations', {
     bucketName: definition.bucketName,
@@ -42,12 +45,8 @@ export const createOperations = <
 
   const { bucketName, options, coordinate } = definition;
 
-  // Placeholder implementations for finders, actions, and facets
-  const notImplemented = () => {
-    throw new Error('Not implemented yet - will be implemented in Prompt 06');
-  };
-
-  return {
+  // Create implementation operations (core CRUD and query operations)
+  const implOps: Library.ImplementationOperations<V, S, L1, L2, L3, L4, L5> = {
     get: async (key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>) => {
       return ops.get<V, S, L1, L2, L3, L4, L5>(
         storage,
@@ -158,19 +157,26 @@ export const createOperations = <
       );
     },
 
-    // Finders, actions, and facets - to be implemented in Prompt 06
-    finders: {} as any,
-    actions: {} as any,
-    facets: {} as any,
-    allActions: {} as any,
-    allFacets: {} as any,
-    
-    // Additional methods
-    find: notImplemented as any,
-    findOne: notImplemented as any,
-    action: notImplemented as any,
-    facet: notImplemented as any,
-    allAction: notImplemented as any,
-    allFacet: notImplemented as any
+    // Find operations - execute user-defined finders
+    find: async (finder: string, params: any = {}, locations?: any) => {
+      if (!options.finders || !options.finders[finder]) {
+        throw new Error(`Finder '${finder}' not found`);
+      }
+      
+      // Execute user's finder function which should do the query
+      return options.finders[finder](params, locations);
+    },
+
+    findOne: async (finder: string, params: any = {}, locations?: any) => {
+      if (!options.finders || !options.finders[finder]) {
+        throw new Error(`Finder '${finder}' not found`);
+      }
+      
+      const results = await options.finders[finder](params, locations);
+      return results.length > 0 ? results[0] : null;
+    }
   };
+
+  // Wrap with hooks, validation, and extended operations using @fjell/lib wrapper
+  return Library.wrapOperations(implOps as any, options, coordinate, _registry || ({} as Registry));
 };
