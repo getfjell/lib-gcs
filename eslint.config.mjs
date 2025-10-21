@@ -9,5 +9,12 @@ export default [
       "no-undefined": "off",
     },
   },
+  {
+    // Allow more parameters for internal operation functions
+    files: ["src/ops/**/*.ts"],
+    rules: {
+      "max-params": ["warn", 10],
+    },
+  },
 ];
 

@@ -38,7 +38,9 @@
     "@fjell/lib": "^4.4.59",
     "@fjell/logging": "^4.4.50",
     "@fjell/registry": "^4.4.53",
-    "deepmerge": "^4.3.1"
+    "@types/uuid": "^10.0.0",
+    "deepmerge": "^4.3.1",
+    "uuid": "^13.0.0"
   },
   "peerDependencies": {
     "@google-cloud/storage": "^7.x"
