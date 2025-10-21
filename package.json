@@ -64,5 +64,16 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/getfjell/lib-gcs.git"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/getfjell/lib-gcs/issues"
+  },
+  "homepage": "https://github.com/getfjell/lib-gcs#readme",
+  "author": "Fjell Team",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md"
+  ]
 }
