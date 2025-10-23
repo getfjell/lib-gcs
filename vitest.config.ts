@@ -15,6 +15,11 @@ export default defineConfig({
       exclude: [
         'node_modules/**',
         'tests/**',
+        // exclude example scripts from coverage calculation
+        'examples/**',
+        // exclude barrel files and pure type definitions
+        'src/validation/index.ts',
+        'src/types/**',
         'src/index.ts',
         '**/*.d.ts',
         'dist/**',
