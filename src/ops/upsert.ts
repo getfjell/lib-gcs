@@ -1,5 +1,5 @@
 import { Storage } from '@google-cloud/storage';
-import { ComKey, Coordinate, Item, LocKeyArray, PriKey } from '@fjell/core';
+import { ComKey, Coordinate, Item, LocKeyArray, NotFoundError, PriKey } from '@fjell/core';
 import { PathBuilder } from '../PathBuilder';
 import { FileProcessor } from '../FileProcessor';
 import { Options } from '../Options';
@@ -44,9 +44,12 @@ export async function upsert<
     );
   }
 
+  let existing: V | null = null;
+
   try {
     // Try to get existing item
-    const existing = await get<V, S, L1, L2, L3, L4, L5>(
+    logger.default('Retrieving item by key', { key });
+    existing = await get<V, S, L1, L2, L3, L4, L5>(
       storage,
       bucketName,
       key,
@@ -55,44 +58,51 @@ export async function upsert<
       coordinate,
       options
     );
-
-    if (existing) {
-      // Item exists, update with merge strategy
-      logger.default('Item exists, updating');
-      return update<V, S, L1, L2, L3, L4, L5>(
-        storage,
-        bucketName,
-        key,
-        item,
-        updateOptions,
-        pathBuilder,
-        fileProcessor,
-        coordinate,
-        options
-      );
+  } catch (error: any) {
+    // Check if this is a NotFoundError (preserved by core wrapper)
+    if (error instanceof NotFoundError) {
+      // If it's a "not found" error, existing stays null and we create below
+      logger.default('Item not found, will create', { key });
     } else {
-      // Item doesn't exist, create it
-      logger.default('Item does not exist, creating');
-      
-      const createOptions: CreateOptions<S, L1, L2, L3, L4, L5> = {
-        key,
-        locations
-      };
-
-      return create<V, S, L1, L2, L3, L4, L5>(
-        storage,
-        bucketName,
-        item,
-        createOptions,
-        pathBuilder,
-        fileProcessor,
-        coordinate,
-        options
-      );
+      // Re-throw other errors (connection issues, permissions, etc.)
+      logger.error('Error getting item during upsert', { key, error });
+      throw error;
     }
-  } catch (error) {
-    logger.error('Error upserting item', { key, error });
-    throw error;
+  }
+
+  if (existing) {
+    // Item exists, update with merge strategy
+    logger.default('Item exists, updating');
+    return update<V, S, L1, L2, L3, L4, L5>(
+      storage,
+      bucketName,
+      key,
+      item,
+      updateOptions,
+      pathBuilder,
+      fileProcessor,
+      coordinate,
+      options
+    );
+  } else {
+    // Item doesn't exist, create it
+    logger.default('Item does not exist, creating');
+    
+    const createOptions: CreateOptions<S, L1, L2, L3, L4, L5> = {
+      key,
+      locations
+    };
+
+    return create<V, S, L1, L2, L3, L4, L5>(
+      storage,
+      bucketName,
+      item,
+      createOptions,
+      pathBuilder,
+      fileProcessor,
+      coordinate,
+      options
+    );
   }
 }
 
