@@ -60,12 +60,18 @@ export async function upsert<
     );
   } catch (error: any) {
     // Check if this is a NotFoundError (preserved by core wrapper)
-    if (error instanceof NotFoundError) {
+    // Check both instanceof and error code to handle cases where
+    // module duplication might break instanceof checks
+    const isNotFound = error instanceof NotFoundError ||
+      error?.name === 'NotFoundError' ||
+      error?.errorInfo?.code === 'NOT_FOUND';
+
+    if (isNotFound) {
       // If it's a "not found" error, existing stays null and we create below
-      logger.default('Item not found, will create', { key });
+      logger.default('Item not found, will create', { key, errorType: error?.name, errorCode: error?.errorInfo?.code });
     } else {
       // Re-throw other errors (connection issues, permissions, etc.)
-      logger.error('Error getting item during upsert', { key, error });
+      logger.error('Error getting item during upsert', { key, error: error?.message, name: error?.name, code: error?.errorInfo?.code });
       throw error;
     }
   }
@@ -87,7 +93,7 @@ export async function upsert<
   } else {
     // Item doesn't exist, create it
     logger.default('Item does not exist, creating');
-    
+
     const createOptions: CreateOptions<S, L1, L2, L3, L4, L5> = {
       key,
       locations
