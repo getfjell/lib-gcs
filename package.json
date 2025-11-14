@@ -34,10 +34,10 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.58",
-    "@fjell/lib": "^4.4.65",
-    "@fjell/logging": "^4.4.55",
-    "@fjell/registry": "^4.4.62",
+    "@fjell/core": "^4.4.60",
+    "@fjell/lib": "^4.4.66",
+    "@fjell/logging": "^4.4.57",
+    "@fjell/registry": "^4.4.64",
     "@types/uuid": "^11.0.0",
     "deepmerge": "^4.3.1",
     "uuid": "^13.0.0"
@@ -48,7 +48,7 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@eslint/js": "^9.38.0",
-    "@fjell/common-config": "^1.1.29",
+    "@fjell/common-config": "^1.1.30",
     "@swc/core": "^1.13.5",
     "@tsconfig/recommended": "^1.0.10",
     "@types/node": "^24.9.1",
