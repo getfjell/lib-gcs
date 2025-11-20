@@ -1,5 +1,5 @@
 import { Storage } from '@google-cloud/storage';
-import { ComKey, Coordinate, Item, NotFoundError, PriKey } from '@fjell/core';
+import { ComKey, Coordinate, UpdateOptions as CoreUpdateOptions, Item, NotFoundError, PriKey } from '@fjell/core';
 import { PathBuilder } from '../PathBuilder';
 import { FileProcessor } from '../FileProcessor';
 import { Options } from '../Options';
@@ -9,8 +9,27 @@ import deepmerge from 'deepmerge';
 
 const logger = GCSLogger.get('ops', 'update');
 
-export interface UpdateOptions {
+// Internal type for backward compatibility with existing filesystem-specific mergeStrategy
+interface InternalUpdateOptions {
   mergeStrategy?: 'deep' | 'shallow' | 'replace';
+}
+
+// Helper to map core UpdateOptions to internal mergeStrategy
+function mapUpdateOptions(options?: CoreUpdateOptions | InternalUpdateOptions): InternalUpdateOptions {
+  if (!options) {
+    return { mergeStrategy: 'deep' };  // Default to safe deep merge
+  }
+  
+  // Check if it's already InternalUpdateOptions (has mergeStrategy property)
+  if ('mergeStrategy' in options) {
+    return options as InternalUpdateOptions;
+  }
+  
+  // Map CoreUpdateOptions replace flag to mergeStrategy
+  const coreOptions = options as CoreUpdateOptions;
+  return {
+    mergeStrategy: coreOptions.replace ? 'replace' : 'deep'
+  };
 }
 
 /**
@@ -29,7 +48,7 @@ export async function update<
   bucketName: string,
   key: PriKey<S> | ComKey<S, L1, L2, L3, L4, L5>,
   item: Partial<Item<S, L1, L2, L3, L4, L5>>,
-  updateOptions: UpdateOptions | undefined,
+  updateOptions: CoreUpdateOptions | InternalUpdateOptions | undefined,
   pathBuilder: PathBuilder,
   fileProcessor: FileProcessor,
   coordinate: Coordinate<S, L1, L2, L3, L4, L5>,
@@ -66,8 +85,21 @@ export async function update<
       );
     }
 
-    // Apply merge strategy (default: deep)
-    const mergeStrategy = updateOptions?.mergeStrategy || 'deep';
+    // Map core UpdateOptions to internal mergeStrategy
+    const internalOptions = mapUpdateOptions(updateOptions);
+    const mergeStrategy = internalOptions.mergeStrategy!;
+    
+    // Log warning if replace mode is used
+    if (updateOptions && 'replace' in updateOptions && updateOptions.replace) {
+      logger.warning('⚠️  [LIB-GCS] FULL OBJECT REPLACEMENT MODE', {
+        bucketName,
+        key: { kt: key.kt, pk: key.pk },
+        fieldsBeingSet: Object.keys(item),
+        warning: 'All fields not included in update will be DELETED!',
+        reason: 'UpdateOptions.replace = true was specified'
+      });
+    }
+    
     let updated: V;
 
     switch (mergeStrategy) {

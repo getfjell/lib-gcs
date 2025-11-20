@@ -70,13 +70,13 @@ export async function deleteFile<
           files[label] = filtered;
         }
 
-        // Update item
+        // Update item (undefined defaults to deep merge)
         await update<V, S, L1, L2, L3, L4, L5>(
           storage,
           bucketName,
           key,
           { files } as any,
-          { mergeStrategy: 'deep' },
+          undefined, // eslint-disable-line no-undefined
           pathBuilder,
           fileProcessor,
           coordinate,

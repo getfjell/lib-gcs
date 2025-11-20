@@ -1,11 +1,11 @@
 import { Storage } from '@google-cloud/storage';
-import { ComKey, Coordinate, Item, LocKeyArray, NotFoundError, PriKey } from '@fjell/core';
+import { ComKey, Coordinate, Item, LocKeyArray, NotFoundError, PriKey, UpdateOptions } from '@fjell/core';
 import { PathBuilder } from '../PathBuilder';
 import { FileProcessor } from '../FileProcessor';
 import { Options } from '../Options';
 import { get } from './get';
 import { create, CreateOptions } from './create';
-import { update, UpdateOptions } from './update';
+import { update } from './update';
 import GCSLogger from '../logger';
 
 const logger = GCSLogger.get('ops', 'upsert');
