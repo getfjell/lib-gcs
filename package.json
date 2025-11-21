@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-gcs",
-  "version": "4.4.23",
+  "version": "4.4.24",
   "type": "module",
   "keywords": [
     "library",
@@ -34,10 +34,10 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.62",
-    "@fjell/lib": "^4.4.70",
+    "@fjell/core": "^4.4.63",
+    "@fjell/lib": "^4.4.72",
     "@fjell/logging": "^4.4.58",
-    "@fjell/registry": "^4.4.68",
+    "@fjell/registry": "^4.4.69",
     "@types/uuid": "^11.0.0",
     "deepmerge": "^4.3.1",
     "uuid": "^13.0.0"
