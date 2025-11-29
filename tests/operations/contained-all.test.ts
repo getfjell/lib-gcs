@@ -73,9 +73,10 @@ describe('Contained Items - all operation', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result).toHaveLength(2);
-    expect(result[0].text).toBe('First comment');
-    expect(result[1].text).toBe('Second comment');
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0].text).toBe('First comment');
+    expect(result.items[1].text).toBe('Second comment');
+    expect(result.metadata.total).toBe(2);
 
     // Verify correct prefix was used
     const getFilesCall = mockBucket.getFiles.mock.calls[0][0];
@@ -120,7 +121,8 @@ describe('Contained Items - all operation', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result).toHaveLength(2);
+    expect(result.items).toHaveLength(2);
+    expect(result.metadata.total).toBe(2);
   });
 });
 

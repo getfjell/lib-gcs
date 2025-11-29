@@ -42,25 +42,20 @@ export async function one<
   }
 
   try {
-    // Optimize query by adding limit: 1 if not already present
-    const optimizedQuery: ItemQuery = {
-      ...query,
-      limit: 1
-    };
-
-    // Use all() operation with limit of 1
-    const items = await all<V, S, L1, L2, L3, L4, L5>(
+    // Use all() operation with limit of 1 via allOptions
+    const result = await all<V, S, L1, L2, L3, L4, L5>(
       storage,
       bucketName,
-      optimizedQuery,
+      query,
       locations,
       pathBuilder,
       fileProcessor,
       coordinate,
-      options
+      options,
+      { limit: 1 }
     );
 
-    return items.length > 0 ? items[0] : null;
+    return result.items.length > 0 ? result.items[0] : null;
   } catch (error) {
     logger.error('Error getting one item', { error });
     throw error;
