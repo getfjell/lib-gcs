@@ -47,7 +47,9 @@ describe('Finders, Actions, and Facets Integration', () => {
       mockBucket.getFiles.mockResolvedValue([mockFiles]);
 
       // Define custom finder
-      const byStatus = async (params: any) => {
+      // Finder can accept (params, locations, findOptions) but locations and findOptions are optional
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const byStatus = async (params: any, locations?: any, findOptions?: any) => {
         // In real implementation, this would call library.operations.all() with a query
         // For testing, we'll simulate the behavior
         const mockLib = createPrimaryGCSLibrary<TestUser, 'user'>(
@@ -56,8 +58,9 @@ describe('Finders, Actions, and Facets Integration', () => {
           'test-bucket',
           mockStorage
         );
-        const all = await mockLib.operations.all();
-        return all.filter(u => u.status === params.status);
+        const result = await mockLib.operations.all();
+        // Return array - wrapper will wrap it in FindOperationResult
+        return result.items.filter(u => u.status === params.status);
       };
 
       const library = createPrimaryGCSLibrary<TestUser, 'user'>(
@@ -71,8 +74,9 @@ describe('Finders, Actions, and Facets Integration', () => {
       // Execute finder
       const results = await library.operations.find('byStatus', { status: 'active' });
       
-      expect(results).toHaveLength(2);
-      expect(results.every(u => u.status === 'active')).toBe(true);
+      expect(results.items).toHaveLength(2);
+      expect(results.items.every(u => u.status === 'active')).toBe(true);
+      expect(results.metadata.total).toBe(2);
     });
 
     it('should throw error for non-existent finder', async () => {

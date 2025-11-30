@@ -61,9 +61,10 @@ describe('Query Filters and Sorting', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result).toHaveLength(2);
-    expect(result[0].category).toBe('A');
-    expect(result[1].category).toBe('A');
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0].category).toBe('A');
+    expect(result.items[1].category).toBe('A');
+    expect(result.metadata.total).toBe(2);
   });
 
   it('should apply sort ascending', async () => {
@@ -91,9 +92,10 @@ describe('Query Filters and Sorting', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result[0].name).toBe('A');
-    expect(result[1].name).toBe('B');
-    expect(result[2].name).toBe('C');
+    expect(result.items[0].name).toBe('A');
+    expect(result.items[1].name).toBe('B');
+    expect(result.items[2].name).toBe('C');
+    expect(result.metadata.total).toBe(3);
   });
 
   it('should apply sort descending', async () => {
@@ -121,9 +123,10 @@ describe('Query Filters and Sorting', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result[0].value).toBe(3);
-    expect(result[1].value).toBe(2);
-    expect(result[2].value).toBe(1);
+    expect(result.items[0].value).toBe(3);
+    expect(result.items[1].value).toBe(2);
+    expect(result.items[2].value).toBe(1);
+    expect(result.metadata.total).toBe(3);
   });
 
   it('should combine filter, sort, offset, and limit', async () => {
@@ -162,9 +165,10 @@ describe('Query Filters and Sorting', () => {
     // Sort desc by value: [E(5),C(3),B(2),A(1)]
     // Offset 1: [C(3),B(2),A(1)]
     // Limit 2: [C(3),B(2)]
-    expect(result).toHaveLength(2);
-    expect(result[0].name).toBe('C');
-    expect(result[1].name).toBe('B');
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0].name).toBe('C');
+    expect(result.items[1].name).toBe('B');
+    expect(result.metadata.total).toBe(4); // Total matching filter
   });
 });
 

@@ -128,15 +128,16 @@ describe('Blog E2E Scenario', () => {
     expect(reply.text).toBe('Thanks!');
 
     // Step 5: List all comments on the post
-    const comments = await commentLib.operations.all(
+    const commentsResult = await commentLib.operations.all(
       undefined,
       [
         { kt: 'post', lk: 'post-123' }
       ]
     );
 
-    expect(comments).toHaveLength(1);
-    expect(comments[0].text).toBe('Great post!');
+    expect(commentsResult.items).toHaveLength(1);
+    expect(commentsResult.items[0].text).toBe('Great post!');
+    expect(commentsResult.metadata.total).toBe(1);
 
     // Step 6: Update the post
     const updatedPost = await postLib.operations.update(
@@ -201,20 +202,22 @@ describe('Blog E2E Scenario', () => {
     );
 
     // List comments on post 1
-    const post1Comments = await commentLib.operations.all(
+    const post1Result = await commentLib.operations.all(
       undefined,
       [{ kt: 'post', lk: 'p1' }]
     );
 
-    expect(post1Comments).toHaveLength(2);
+    expect(post1Result.items).toHaveLength(2);
+    expect(post1Result.metadata.total).toBe(2);
 
     // List comments on post 2
-    const post2Comments = await commentLib.operations.all(
+    const post2Result = await commentLib.operations.all(
       undefined,
       [{ kt: 'post', lk: 'p2' }]
     );
 
-    expect(post2Comments).toHaveLength(1);
+    expect(post2Result.items).toHaveLength(1);
+    expect(post2Result.metadata.total).toBe(1);
   });
 
   it('should support custom finders and actions', async () => {
@@ -228,8 +231,8 @@ describe('Blog E2E Scenario', () => {
         mode: 'full',
         finders: {
           byStatus: async (params: any) => {
-            const all = await postLibWithFinder.operations.all();
-            return all.filter(p => p.status === params.status);
+            const result = await postLibWithFinder.operations.all();
+            return result.items.filter(p => p.status === params.status);
           }
         },
         actions: {
@@ -253,9 +256,10 @@ describe('Blog E2E Scenario', () => {
     );
 
     // Find draft posts
-    const drafts = await postLibWithFinder.operations.find('byStatus', { status: 'draft' });
-    expect(drafts).toHaveLength(1);
-    expect(drafts[0].title).toBe('Draft 1');
+    const draftsResult = await postLibWithFinder.operations.find('byStatus', { status: 'draft' });
+    // find() now returns FindOperationResult
+    expect(draftsResult.items).toHaveLength(1);
+    expect(draftsResult.items[0].title).toBe('Draft 1');
 
     // Publish a draft post using action
     const [publishedPost] = await postLibWithFinder.operations.action(

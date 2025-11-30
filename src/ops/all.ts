@@ -1,5 +1,5 @@
 import { Storage } from '@google-cloud/storage';
-import { Coordinate, Item, ItemQuery, LocKeyArray } from '@fjell/core';
+import { AllOperationResult, AllOptions, Coordinate, Item, ItemQuery, LocKeyArray } from '@fjell/core';
 import { PathBuilder } from '../PathBuilder';
 import { FileProcessor } from '../FileProcessor';
 import { Options } from '../Options';
@@ -8,7 +8,7 @@ import GCSLogger from '../logger';
 const logger = GCSLogger.get('ops', 'all');
 
 /**
- * Get all items matching a query from GCS
+ * Get all items matching a query from GCS with pagination support
  * ⚠️ WARNING: Downloads and filters in-memory. Not suitable for large datasets.
  */
 export async function all<
@@ -27,9 +27,10 @@ export async function all<
   pathBuilder: PathBuilder,
   fileProcessor: FileProcessor,
   coordinate: Coordinate<S, L1, L2, L3, L4, L5>,
-  options: Options<V, S, L1, L2, L3, L4, L5>
-): Promise<V[]> {
-  logger.default('all', { query, locations, bucketName });
+  options: Options<V, S, L1, L2, L3, L4, L5>,
+  allOptions?: AllOptions
+): Promise<AllOperationResult<V>> {
+  logger.default('all', { query, locations, bucketName, allOptions });
 
   // Check if in files-only mode
   if (options.mode === 'files-only') {
@@ -128,7 +129,7 @@ export async function all<
 
     logger.default('Downloaded and deserialized items', { count: items.length });
 
-    // Apply query filters if provided
+    // Apply query filters if provided (but NOT pagination yet)
     let filtered = items;
 
     if (query && (query as any).filter) {
@@ -156,18 +157,41 @@ export async function all<
       });
     }
 
-    // Apply offset if provided
-    if (query?.offset) {
-      filtered = filtered.slice(query.offset);
+    // Get total count BEFORE applying pagination
+    const total = filtered.length;
+
+    // Determine effective limit/offset (allOptions takes precedence over query)
+    const effectiveLimit = allOptions?.limit ?? query?.limit;
+    const effectiveOffset = allOptions?.offset ?? query?.offset ?? 0;
+
+    logger.default('Pagination', { total, effectiveLimit, effectiveOffset });
+
+    // Apply pagination
+    let result = filtered;
+
+    // Apply offset
+    if (effectiveOffset > 0) {
+      result = result.slice(effectiveOffset);
     }
 
-    // Apply limit if provided
-    if (query?.limit) {
-      filtered = filtered.slice(0, query.limit);
+    // Apply limit
+    if (effectiveLimit != null) {
+      result = result.slice(0, effectiveLimit);
     }
 
-    logger.default('Filtered and sorted items', { count: filtered.length });
-    return filtered;
+    logger.default('Filtered, sorted and paginated items', { count: result.length, total });
+
+    // Return AllOperationResult with items and metadata
+    return {
+      items: result,
+      metadata: {
+        total,
+        returned: result.length,
+        limit: effectiveLimit,
+        offset: effectiveOffset,
+        hasMore: effectiveOffset + result.length < total
+      }
+    };
   } catch (error) {
     logger.error('Error getting all items', { error });
     throw error;
