@@ -108,7 +108,8 @@ describe('Operations Integration', () => {
 
     const result = await operations.all();
 
-    expect(result).toEqual([]);
+    expect(result.items).toEqual([]);
+    expect(result.metadata.total).toBe(0);
   });
 
   it('should execute one operation through operations interface', async () => {

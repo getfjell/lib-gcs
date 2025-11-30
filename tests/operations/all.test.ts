@@ -63,9 +63,10 @@ describe('all operation', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result).toHaveLength(2);
-    expect(result[0].name).toBe('Item 1');
-    expect(result[1].name).toBe('Item 2');
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0].name).toBe('Item 1');
+    expect(result.items[1].name).toBe('Item 2');
+    expect(result.metadata.total).toBe(2);
   });
 
   it('should apply query limit', async () => {
@@ -93,7 +94,8 @@ describe('all operation', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result).toHaveLength(2);
+    expect(result.items).toHaveLength(2);
+    expect(result.metadata.total).toBe(3);
   });
 
   it('should apply query offset', async () => {
@@ -121,8 +123,9 @@ describe('all operation', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result).toHaveLength(2);
-    expect(result[0].name).toBe('Item 2');
+    expect(result.items).toHaveLength(2);
+    expect(result.items[0].name).toBe('Item 2');
+    expect(result.metadata.total).toBe(3);
   });
 
   it('should throw error if file count exceeds maxScanFiles', async () => {
@@ -212,7 +215,8 @@ describe('all operation', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result).toHaveLength(1);
+    expect(result.items).toHaveLength(1);
+    expect(result.metadata.total).toBe(1);
     expect(mockFiles[1].download).not.toHaveBeenCalled(); // TXT file not downloaded
   });
 
@@ -243,8 +247,9 @@ describe('all operation', () => {
       { bucketName, mode: 'full' } as any
     );
 
-    expect(result).toHaveLength(1); // Only successful download
-    expect(result[0].name).toBe('Item 1');
+    expect(result.items).toHaveLength(1); // Only successful download
+    expect(result.items[0].name).toBe('Item 1');
+    expect(result.metadata.total).toBe(1);
   });
 });
 

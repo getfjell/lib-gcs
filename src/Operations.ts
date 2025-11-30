@@ -1,4 +1,4 @@
-import { ComKey, Item, ItemQuery, LocKeyArray, PriKey } from '@fjell/core';
+import { AllOptions, ComKey, FindOperationResult, Item, ItemQuery, LocKeyArray, PriKey } from '@fjell/core';
 import { Storage } from '@google-cloud/storage';
 import * as Library from '@fjell/lib';
 import { Definition } from './Definition';
@@ -127,7 +127,8 @@ export const createOperations = <
 
     all: async (
       query?: ItemQuery,
-      locations?: LocKeyArray<L1, L2, L3, L4, L5> | []
+      locations?: LocKeyArray<L1, L2, L3, L4, L5> | [],
+      allOptions?: AllOptions
     ) => {
       return ops.all<V, S, L1, L2, L3, L4, L5>(
         storage,
@@ -137,7 +138,8 @@ export const createOperations = <
         pathBuilder,
         fileProcessor,
         coordinate,
-        options
+        options,
+        allOptions
       );
     },
 
@@ -158,13 +160,33 @@ export const createOperations = <
     },
 
     // Find operations - execute user-defined finders
-    find: async (finder: string, params: any = {}, locations?: any) => {
+    find: async (finder: string, params: any = {}, locations?: any, findOptions?: any): Promise<FindOperationResult<V>> => {
       if (!options.finders || !options.finders[finder]) {
         throw new Error(`Finder '${finder}' not found`);
       }
       
-      // Execute user's finder function which should do the query
-      return options.finders[finder](params, locations);
+      // Execute user's finder function - pass findOptions for opt-in pagination support
+      // Finder can return FindOperationResult<V> (opt-in) or V[] (legacy)
+      // Type assertion needed because FinderMethod type from @fjell/lib may be stale
+      const finderResult = await (options.finders[finder] as any)(params, locations, findOptions);
+      
+      // Check if finder opted-in (returned FindOperationResult) or legacy (returned V[])
+      if (finderResult && typeof finderResult === 'object' && 'items' in finderResult && 'metadata' in finderResult) {
+        // Finder opted-in: return as-is
+        return finderResult as FindOperationResult<V>;
+      } else {
+        // Legacy finder: wrap array in FindOperationResult
+        const items = (finderResult || []) as V[];
+        return {
+          items,
+          metadata: {
+            total: items.length,
+            returned: items.length,
+            offset: 0,
+            hasMore: false
+          }
+        };
+      }
     },
 
     findOne: async (finder: string, params: any = {}, locations?: any) => {
@@ -172,8 +194,15 @@ export const createOperations = <
         throw new Error(`Finder '${finder}' not found`);
       }
       
-      const results = await options.finders[finder](params, locations);
-      return results.length > 0 ? results[0] : null;
+      // Call finder with limit: 1 and extract first item
+      // Type assertion needed because FinderMethod type from @fjell/lib may be stale
+      const result = await (options.finders[finder] as any)(params, locations, { limit: 1 });
+      // Handle both FindOperationResult and V[] return types
+      if (result && typeof result === 'object' && 'items' in result && 'metadata' in result) {
+        return result.items.length > 0 ? result.items[0] : null;
+      }
+      const results = result as V[];
+      return results && results.length > 0 ? results[0] : null;
     }
   };
 
