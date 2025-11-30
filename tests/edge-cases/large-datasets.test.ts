@@ -73,7 +73,7 @@ describe('Large Datasets Edge Cases', () => {
     const mockBucket = mockStorage.bucket(bucketName);
     mockBucket.getFiles = vi.fn().mockResolvedValue([mockFiles]);
 
-    const results = await all<TestItem, 'item'>(
+    const result = await all<TestItem, 'item'>(
       mockStorage,
       bucketName,
       undefined,
@@ -91,7 +91,8 @@ describe('Large Datasets Edge Cases', () => {
       } as any
     );
 
-    expect(results).toHaveLength(25);
+    expect(result.items).toHaveLength(25);
+    expect(result.metadata.total).toBe(25);
   });
 
   it('should throw error when query operations are disabled', async () => {
