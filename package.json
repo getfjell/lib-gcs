@@ -34,10 +34,10 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.72",
-    "@fjell/lib": "^4.4.81",
+    "@fjell/core": "^4.4.73",
+    "@fjell/lib": "^4.4.82",
     "@fjell/logging": "^4.4.65",
-    "@fjell/registry": "^4.4.80",
+    "@fjell/registry": "^4.4.81",
     "@types/uuid": "^11.0.0",
     "deepmerge": "^4.3.1",
     "uuid": "^13.0.0"
