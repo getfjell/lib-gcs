@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-gcs",
-  "version": "4.4.33",
+  "version": "4.4.34",
   "type": "module",
   "keywords": [
     "library",
@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@fjell/core": "^4.4.73",
-    "@fjell/lib": "^4.4.82",
+    "@fjell/lib": "^4.4.83",
     "@fjell/logging": "^4.4.65",
     "@fjell/registry": "^4.4.81",
     "@types/uuid": "^11.0.0",
