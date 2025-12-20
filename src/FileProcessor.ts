@@ -10,7 +10,7 @@ export class FileProcessor {
   /**
    * Serialize an item to JSON string
    */
-  serialize<V extends Item<string>>(item: V): string {
+  serialize<V extends Item<any, any, any, any, any, any>>(item: V): string {
     try {
       return JSON.stringify(item, null, 2);
     } catch (error: any) {
@@ -35,10 +35,10 @@ export class FileProcessor {
    * Deserialize JSON string to an item
    * Returns null if deserialization fails or item is invalid
    */
-  deserialize<V extends Item<string>>(
+  deserialize<V extends Item<any, any, any, any, any, any>>(
     content: string,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    _coordinate: Coordinate<string>
+    _coordinate: Coordinate<any, any, any, any, any, any>
   ): V | null {
     try {
       const item = JSON.parse(content) as V;
@@ -58,7 +58,7 @@ export class FileProcessor {
   /**
    * Validate that an object has the basic structure of an Item
    */
-  validateItemStructure(item: any): item is Item<string> {
+  validateItemStructure(item: any): item is Item<any, any, any, any, any, any> {
     if (!item || typeof item !== 'object') {
       return false;
     }
@@ -78,7 +78,7 @@ export class FileProcessor {
   /**
    * Serialize item to a Buffer (for uploading to GCS)
    */
-  serializeToBuffer<V extends Item<string>>(item: V): Buffer {
+  serializeToBuffer<V extends Item<any, any, any, any, any, any>>(item: V): Buffer {
     const json = this.serialize(item);
     return Buffer.from(json, 'utf-8');
   }
@@ -86,9 +86,9 @@ export class FileProcessor {
   /**
    * Deserialize from a Buffer (from GCS download)
    */
-  deserializeFromBuffer<V extends Item<string>>(
+  deserializeFromBuffer<V extends Item<any, any, any, any, any, any>>(
     buffer: Buffer,
-    coordinate: Coordinate<string>
+    coordinate: Coordinate<any, any, any, any, any, any>
   ): V | null {
     try {
       const content = buffer.toString('utf-8');

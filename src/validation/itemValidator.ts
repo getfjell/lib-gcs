@@ -1,4 +1,4 @@
-import { ComKey, Coordinate, isComKey, Item, LocKeyArray, PriKey, ValidationError } from '@fjell/core';
+import { ComKey, Coordinate, isComKey, isPriKey, Item, LocKeyArray, PriKey, ValidationError } from '@fjell/core';
 import GCSLogger from '../logger';
 
 const logger = GCSLogger.get('validation', 'itemValidator');
@@ -79,24 +79,31 @@ export function validateKey(
     );
   }
 
-  // For ComKey, validate locations
-  if (isComKey(key)) {
-    const comKey = key as ComKey<any, any, any, any, any, any>;
-    if (!comKey.loc || (comKey.loc as any[]).length === 0) {
+  // Validate key type matches coordinate hierarchy
+  const expectedLocations = coordinate.kta.length - 1;
+  if (expectedLocations > 0) {
+    if (!isComKey(key)) {
       throw new ValidationError(
         'ComKey must have locations',
         ['loc'],
         'Provide loc array for contained items'
       );
     }
-
+    const comKey = key as ComKey<any, any, any, any, any, any>;
     // Validate location count matches coordinate
-    const expectedLocations = coordinate.kta.length - 1;
     if ((comKey.loc as any[]).length !== expectedLocations) {
       throw new ValidationError(
         `ComKey has ${(comKey.loc as any[]).length} locations but coordinate expects ${expectedLocations}`,
         [String(expectedLocations)],
         `Provide exactly ${expectedLocations} location(s)`
+      );
+    }
+  } else {
+    if (!isPriKey(key)) {
+      throw new ValidationError(
+        'Primary library requires a PriKey',
+        ['key'],
+        'Provide a primary key without locations'
       );
     }
   }
