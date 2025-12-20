@@ -1,4 +1,5 @@
-import { ComKey, Coordinate, isComKey, isPriKey, Item, LocKeyArray, PriKey, ValidationError } from '@fjell/core';
+import { ComKey, Coordinate, Item, LocKeyArray, PriKey } from '@fjell/types';
+import { isComKey, isPriKey, ValidationError } from '@fjell/core';
 import GCSLogger from '../logger';
 
 const logger = GCSLogger.get('validation', 'itemValidator');

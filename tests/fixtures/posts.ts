@@ -1,4 +1,4 @@
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 export interface Post extends Item<'post', 'user'> {
   title: string;

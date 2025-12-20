@@ -10,7 +10,7 @@
 import { createPrimaryGCSLibrary } from '../src/primary/GCSLibrary';
 import { createContainedGCSLibrary } from '../src/contained/GCSLibrary';
 import { Storage } from '@google-cloud/storage';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 interface Post extends Item<'post'> {
   title: string;

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { listFiles } from '../../src/ops/files/listFiles';
 import { PathBuilder } from '../../src/PathBuilder';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 interface TestRecording extends Item<'recording'> {
   title: string;

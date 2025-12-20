@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createPrimaryGCSLibrary } from '../../src/primary/GCSLibrary';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 interface TestUser extends Item<'user'> {
   name: string;

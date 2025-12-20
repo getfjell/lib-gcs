@@ -38,6 +38,7 @@
     "@fjell/lib": "^4.4.83",
     "@fjell/logging": "^4.4.65",
     "@fjell/registry": "^4.4.81",
+    "@fjell/types": "^4.4.4",
     "@types/uuid": "^11.0.0",
     "deepmerge": "^4.3.1",
     "uuid": "^13.0.0"

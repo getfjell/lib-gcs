@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createPrimaryGCSLibrary } from '../../src/primary/GCSLibrary';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 interface TestRecording extends Item<'recording'> {
   title: string;

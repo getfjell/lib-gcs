@@ -1,4 +1,4 @@
-import { Coordinate, Item } from '@fjell/core';
+import { Coordinate, Item } from "@fjell/types";
 import GCSLogger from './logger';
 
 const logger = GCSLogger.get('FileProcessor');
