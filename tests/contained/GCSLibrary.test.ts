@@ -3,7 +3,7 @@ import {
   createContainedGCSLibrary,
   createContainedGCSLibrary2
 } from '../../src/contained/GCSLibrary';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 interface TestPost extends Item<'post', 'user'> {
   title: string;

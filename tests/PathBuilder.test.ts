@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { PathBuilder, PathBuilderConfig } from '../src/PathBuilder';
-import { ComKey, PriKey } from '@fjell/core';
+import { ComKey, PriKey } from "@fjell/types";
 
 describe('PathBuilder', () => {
   describe('Primary Keys - No Sharding', () => {

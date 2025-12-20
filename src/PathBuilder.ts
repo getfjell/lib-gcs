@@ -1,4 +1,5 @@
-import { ComKey, isComKey, PriKey } from '@fjell/core';
+import { ComKey, PriKey } from '@fjell/types';
+import { isComKey } from '@fjell/core';
 import GCSLogger from './logger';
 
 const logger = GCSLogger.get('PathBuilder');

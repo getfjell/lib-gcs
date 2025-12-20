@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { create } from '../../src/ops/create';
 import { PathBuilder } from '../../src/PathBuilder';
 import { FileProcessor } from '../../src/FileProcessor';
-import { createCoordinate, Item } from '@fjell/core';
+import { Item } from "@fjell/types";
+import { createCoordinate } from "@fjell/core";
 
 interface TestItem extends Item<'test'> {
   name: string;

@@ -1,4 +1,4 @@
-import { Item, ItemTypeArray } from '@fjell/core';
+import { Item, ItemTypeArray } from "@fjell/types";
 import * as Library from '@fjell/lib';
 import { Storage } from '@google-cloud/storage';
 import { createGCSLibrary, GCSLibrary } from '../GCSLibrary';

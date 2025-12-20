@@ -13,5 +13,5 @@ export * as Primary from './primary';
 // Export file types
 export * from './types/Files';
 
-// Re-export commonly used types from @fjell/core for convenience
-export type { PriKey, ComKey, Item, Coordinate, ItemTypeArray } from '@fjell/core';
+// Re-export commonly used types from @fjell/types for convenience
+export type { PriKey, ComKey, Item, Coordinate, ItemTypeArray } from '@fjell/types';

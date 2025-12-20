@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createPrimaryGCSLibrary } from '../../src/primary/GCSLibrary';
 import { createGCSLibrary } from '../../src/GCSLibrary';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 import { Registry } from '@fjell/lib';
 import { createMockStorage } from '../mocks/storageMock';
 

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createDefinition } from '../src/Definition';
-import { ItemTypeArray } from '@fjell/core';
+import { ItemTypeArray } from "@fjell/types";
 
 describe('createDefinition', () => {
   it('should create a definition with all required fields', () => {

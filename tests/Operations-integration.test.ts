@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { createOperations } from '../src/Operations';
-import { createCoordinate, Item } from '@fjell/core';
+import { Item } from "@fjell/types";
+import { createCoordinate } from "@fjell/core";
 import { Definition } from '../src/Definition';
 
 interface TestItem extends Item<'test'> {

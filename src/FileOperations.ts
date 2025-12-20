@@ -1,4 +1,4 @@
-import { ComKey, Coordinate, Item, PriKey } from '@fjell/core';
+import { ComKey, Coordinate, Item, PriKey } from "@fjell/types";
 import { Storage } from '@google-cloud/storage';
 import { PathBuilder } from './PathBuilder';
 import { FileProcessor } from './FileProcessor';

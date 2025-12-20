@@ -1,5 +1,5 @@
 import { Storage } from '@google-cloud/storage';
-import { ComKey, Coordinate, Item, LocKeyArray, PriKey } from '@fjell/core';
+import { ComKey, Coordinate, Item, LocKeyArray, PriKey } from '@fjell/types';
 import { PathBuilder } from '../PathBuilder';
 import { FileProcessor } from '../FileProcessor';
 import { Options } from '../Options';

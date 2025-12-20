@@ -1,4 +1,4 @@
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 export interface Comment extends Item<'comment', 'post', 'user'> {
   text: string;

@@ -5,7 +5,7 @@ import {
   createPrimaryGCSLibrary,
   GCSLibraryFactoryConfig
 } from '../../src/GCSLibraryFactory';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 interface TestUser extends Item<'user'> {
   name: string;
