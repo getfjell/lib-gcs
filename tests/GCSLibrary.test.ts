@@ -4,7 +4,8 @@ import {
   createGCSLibraryFromComponents,
   isGCSLibrary
 } from '../src/GCSLibrary';
-import { createCoordinate, Item } from '@fjell/core';
+import { Item } from "@fjell/types";
+import { createCoordinate } from "@fjell/core";
 import { Registry } from '@fjell/lib';
 
 interface TestItem extends Item<'test'> {

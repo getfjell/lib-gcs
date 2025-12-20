@@ -2,7 +2,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { all } from '../../src/ops/all';
 import { PathBuilder } from '../../src/PathBuilder';
 import { FileProcessor } from '../../src/FileProcessor';
-import { createCoordinate, Item } from '@fjell/core';
+import { Item } from "@fjell/types";
+import { createCoordinate } from "@fjell/core";
 
 interface TestComment extends Item<'comment', 'post'> {
   text: string;

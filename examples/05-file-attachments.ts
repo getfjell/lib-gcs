@@ -12,7 +12,7 @@
 
 import { createPrimaryGCSLibrary } from '../src/primary/GCSLibrary';
 import { Storage } from '@google-cloud/storage';
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 interface Recording extends Item<'recording'> {
   title: string;

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { FileProcessor, fileProcessor } from '../src/FileProcessor';
-import { createCoordinate, Item } from '@fjell/core';
+import { Item } from "@fjell/types";
+import { createCoordinate } from "@fjell/core";
 
 interface TestItem extends Item<'test'> {
   name: string;
