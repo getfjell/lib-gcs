@@ -1,4 +1,4 @@
-import { AllOptions, ComKey, FindOperationResult, Item, ItemQuery, LocKeyArray, PriKey } from '@fjell/core';
+import { AllOptions, ComKey, FindOperationResult, Item, ItemQuery, LocKeyArray, PriKey } from "@fjell/types";
 import { Storage } from '@google-cloud/storage';
 import * as Library from '@fjell/lib';
 import { Definition } from './Definition';

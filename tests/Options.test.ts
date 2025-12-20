@@ -1,4 +1,4 @@
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Define a generic item type for testing purposes

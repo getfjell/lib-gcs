@@ -1,5 +1,6 @@
 import { Storage } from '@google-cloud/storage';
-import { ComKey, Item, NotFoundError, PriKey } from '@fjell/core';
+import { ComKey, Item, PriKey } from '@fjell/types';
+import { NotFoundError } from '@fjell/core';
 import { PathBuilder } from '../../PathBuilder';
 import { Options } from '../../Options';
 import GCSLogger from '../../logger';

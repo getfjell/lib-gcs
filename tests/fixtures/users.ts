@@ -1,4 +1,4 @@
-import { Item } from '@fjell/core';
+import { Item } from "@fjell/types";
 
 export interface User extends Item<'user'> {
   name: string;
