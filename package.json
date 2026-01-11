@@ -64,12 +64,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/getfjell/lib-gcs.git"
+    "url": "git+https://github.com/fjellgrunn/lib-gcs.git"
   },
   "bugs": {
-    "url": "https://github.com/getfjell/lib-gcs/issues"
+    "url": "https://github.com/fjellgrunn/lib-gcs/issues"
   },
-  "homepage": "https://github.com/getfjell/lib-gcs#readme",
+  "homepage": "https://github.com/fjellgrunn/lib-gcs#readme",
   "author": "Fjell Team",
   "files": [
     "dist",
