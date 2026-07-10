@@ -49,8 +49,14 @@ export async function getSignedUrl<
     }
 
     // Generate signed URL
-    const expirationSeconds = signedUrlOptions?.expirationSeconds || 3600;
+    const maxExpiration = signedUrlOptions?.maxExpirationSeconds || 3600;
+    const requestedExpiration = signedUrlOptions?.expirationSeconds || 3600;
+    const expirationSeconds = Math.min(requestedExpiration, maxExpiration);
     const action = signedUrlOptions?.action || 'read';
+    
+    if (requestedExpiration > maxExpiration) {
+      logger.warning('Requested expiration exceeds max, clamping', { requested: requestedExpiration, max: maxExpiration, clampedTo: expirationSeconds });
+    }
     const expires = Date.now() + (expirationSeconds * 1000);
 
     const [url] = await file.getSignedUrl({

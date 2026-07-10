@@ -198,3 +198,21 @@ Apache-2.0
 **Status:** Development/Alpha  
 **Test Coverage:** 95.88%  
 **Tests:** 301 passing
+
+## Limitations
+
+### No Query Support
+GCS is an object storage system, not a database. The @fjell/lib-gcs adapter does not support query operations (find, findOne). All operations are key-based.
+
+### Eventual Consistency
+GCS provides strong consistency for new objects but may have eventual consistency for metadata in some scenarios.
+
+### No Transactions
+Multi-object operations are not atomic. If you need transactional guarantees, consider using @fjell/lib-sequelize with a relational database.
+
+### Signed URL Expiration
+Signed URLs have a maximum expiration of 7 days (604800 seconds) when using service account authentication. The adapter enforces a configurable maxExpirationSeconds (default: 3600 seconds = 1 hour) for safety.
+
+### Resumable Uploads
+Resumable uploads for large files are not yet supported. This is tracked as a future enhancement. For large files, consider uploading directly to GCS and using the file reference management features of this library.
+

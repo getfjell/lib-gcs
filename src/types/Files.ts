@@ -57,6 +57,9 @@ export interface SignedUrlOptions {
   
   /** Response content type override */
   responseContentType?: string;
+
+  /** Maximum allowed expiration in seconds (default: 3600). If expirationSeconds exceeds this, it will be clamped. */
+  maxExpirationSeconds?: number;
   
   /** Content disposition (e.g., "attachment; filename=file.wav") */
   contentDisposition?: string;
