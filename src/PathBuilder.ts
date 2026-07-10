@@ -10,6 +10,8 @@ const logger = GCSLogger.get('PathBuilder');
 export interface PathBuilderConfig {
   bucketName: string;
   directoryPaths: string[];
+  /** When provided, maps key types to directoryPaths by index */
+  kta?: string[];
   basePath?: string;
   useJsonExtension?: boolean;
   keySharding?: {
@@ -25,6 +27,7 @@ export interface PathBuilderConfig {
 export class PathBuilder {
   private readonly bucketName: string;
   private readonly directoryPaths: string[];
+  private readonly kta: string[];
   private readonly basePath: string;
   private readonly useJsonExtension: boolean;
   private readonly shardingEnabled: boolean;
@@ -34,6 +37,7 @@ export class PathBuilder {
   constructor(config: PathBuilderConfig) {
     this.bucketName = config.bucketName;
     this.directoryPaths = config.directoryPaths;
+    this.kta = config.kta || [];
     this.basePath = config.basePath || '';
     this.useJsonExtension = config.useJsonExtension ?? true;
     this.shardingEnabled = config.keySharding?.enabled ?? false;
@@ -43,6 +47,7 @@ export class PathBuilder {
     logger.default('PathBuilder created', {
       bucketName: this.bucketName,
       directoryPaths: this.directoryPaths,
+      kta: this.kta,
       basePath: this.basePath,
       shardingEnabled: this.shardingEnabled,
     });
@@ -150,8 +155,13 @@ export class PathBuilder {
    * Get directory path for a key type
    */
   private getDirectoryForKeyType(kt: string): string {
-    // For simplicity, use kt as directory name
-    // In a full implementation, this would map kt to directoryPaths
+    if (this.kta.length > 0) {
+      const index = this.kta.indexOf(kt);
+      if (index !== -1 && this.directoryPaths[index]) {
+        return this.directoryPaths[index];
+      }
+    }
+    // Fall back to kt when kta mapping is unavailable (unit-test / legacy callers)
     return kt;
   }
 
@@ -224,19 +234,32 @@ export class PathBuilder {
 
       // Simple case: just kt and pk
       if (ktIndex === 0) {
-        const kt = parts[0];
+        const kt = this.getKeyTypeByDirectory(parts[0]);
         return { kt, pk } as PriKey<any>;
       }
 
-      // Complex case: might be a composite key
-      // This is a simplified implementation
-      // In reality, you'd need more context to properly reconstruct ComKeys
-      const kt = parts[ktIndex < 0 ? 0 : ktIndex];
+      // Composite / unexpected depth: do not invent a misleading PriKey
+      if (ktIndex > 0) {
+        logger.warning('parsePathToKey: composite or unexpected path depth; returning null', { path, parts });
+        return null;
+      }
+
+      const kt = this.getKeyTypeByDirectory(parts[ktIndex < 0 ? 0 : ktIndex]);
       return { kt, pk } as PriKey<any>;
     } catch (error) {
       logger.error('Failed to parse path to key', { path, error });
       return null;
     }
+  }
+
+  private getKeyTypeByDirectory(directory: string): string {
+    if (this.kta.length > 0) {
+      const index = this.directoryPaths.indexOf(directory);
+      if (index !== -1 && this.kta[index]) {
+        return this.kta[index];
+      }
+    }
+    return directory;
   }
 
   /**

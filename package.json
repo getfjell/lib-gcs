@@ -1,6 +1,6 @@
 {
   "name": "@fjell/lib-gcs",
-  "version": "4.4.39-dev.0",
+  "version": "4.4.39",
   "type": "module",
   "keywords": [
     "library",
@@ -34,34 +34,33 @@
     "prepublishOnly": "npm run clean && npm run build"
   },
   "dependencies": {
-    "@fjell/core": "^4.4.79",
-    "@fjell/lib": "^4.4.89",
-    "@fjell/logging": "^4.4.72",
-    "@fjell/registry": "^4.4.86",
-    "@fjell/types": "^4.4.9",
-    "@types/uuid": "^11.0.0",
+    "@fjell/core": "^4.4.80",
+    "@fjell/lib": "^4.4.90",
+    "@fjell/logging": "^4.4.73",
+    "@fjell/registry": "^4.4.87",
+    "@fjell/types": "^4.4.10",
     "deepmerge": "^4.3.1",
-    "uuid": "^13.0.0"
+    "uuid": "^13.0.2"
   },
   "peerDependencies": {
     "@google-cloud/storage": "^7.x"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@eslint/js": "^9.38.0",
-    "@fjell/common-config": "^1.1.38",
-    "@google-cloud/storage": "^7.19.0",
-    "@swc/core": "^1.13.5",
+    "@eslint/js": "^9.39.4",
+    "@fjell/common-config": "^1.1.41",
+    "@google-cloud/storage": "^7.21.0",
+    "@swc/core": "^1.15.43",
     "@tsconfig/recommended": "^1.0.10",
-    "@types/node": "^24.9.1",
-    "@typescript-eslint/eslint-plugin": "^8.46.2",
-    "@typescript-eslint/parser": "^8.46.2",
-    "@vitest/coverage-v8": "^4.0.2",
+    "@types/node": "^24.13.3",
+    "@typescript-eslint/eslint-plugin": "^8.63.0",
+    "@typescript-eslint/parser": "^8.63.0",
+    "@vitest/coverage-v8": "^4.1.10",
     "concurrently": "^9.2.1",
-    "esbuild": "0.25.11",
-    "eslint": "^9.38.0",
+    "esbuild": "0.28.1",
+    "eslint": "^9.39.4",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.2"
+    "vitest": "^4.1.10"
   },
   "repository": {
     "type": "git",

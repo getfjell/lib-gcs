@@ -36,6 +36,7 @@ export const createOperations = <
   const pathBuilder = new PathBuilder({
     bucketName: definition.bucketName,
     directoryPaths: definition.directoryPaths,
+    kta: [...definition.coordinate.kta],
     basePath: definition.basePath,
     useJsonExtension: definition.options.useJsonExtension,
     keySharding: definition.options.keySharding
